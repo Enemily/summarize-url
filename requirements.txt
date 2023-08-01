@@ -1,0 +1,6 @@
+flask
+pdfkit
+python-dotenv
+ibm-generative-ai
+langchain
+requests
