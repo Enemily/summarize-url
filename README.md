@@ -8,7 +8,11 @@ A Flask application to summarize URL passages using the watsonx Technology Previ
 4. run 'python3 -m pip3 install -r requirements.txt`
 
 ## Create `.env` file
-1. Add your watsonx.ai API key to the `.env` file in this project directory
+1. Add your watsonx.ai API key to the `.env` file in this project directory. The `.env` file should look like
+```
+GENAI_KEY=<your-genai-key>
+GENAI_API=https://workbench-api.res.ibm.com/v1/
+```
 
 ## Run app
 1. run `python3 app.py`
