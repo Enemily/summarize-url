@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Summarize what's in this URL!</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <div id="container">
+        <h1>Summarize what's in this URL!</h1>
+        <form id="urlForm" action="/generate_pdf_and_summarize" method="post">
+            <input type="text" name="url" placeholder="Enter URL">
+            <input type="submit" value="Summarize">
+        </form>
+        <div id="summary"></div>
+    </div>
+    
+    <script>
+        document.getElementById('urlForm').addEventListener('submit', function (event) {
+            event.preventDefault(); // Prevent the default form submission behavior
+            const url = event.target.url.value;
+            summarizeUrlContent(url);
+        });
+    
+        function summarizeUrlContent(url) {
+            fetch('/generate_pdf_and_summarize', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: new URLSearchParams({
+                    url: url
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('summary').innerText = data.summary;
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        }
+    </script>
+</body>
+</html>
