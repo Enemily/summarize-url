@@ -1,11 +1,10 @@
-# app.py
-
 from flask import Flask, request, jsonify, render_template
 import pdfkit
 import requests
 from dotenv import load_dotenv
 try:
     from langchain.document_loaders import PyPDFLoader
+    from langchain.chains import RetrievalQA
     from langchain.indexes import VectorstoreIndexCreator #vectorize db index with chromadb
     from langchain.embeddings import HuggingFaceEmbeddings #for using HugginFace embedding models
     from langchain.text_splitter import CharacterTextSplitter #text splitter
@@ -16,6 +15,7 @@ from genai.extensions.langchain import LangChainInterface
 from genai.model import Credentials
 from genai.schemas import GenerateParams, ModelType
 
+# load .env file
 load_dotenv()
 api_key = os.getenv("GENAI_KEY", None)
 api_endpoint = os.getenv("GENAI_API", None)
@@ -24,21 +24,22 @@ if api_key is None or api_endpoint is None:
 else:
     creds = Credentials(api_key=api_key, api_endpoint=api_endpoint)
 
+# create Flask class instance
 app = Flask(__name__)
 
+# add root URL route
 @app.route('/')
 def index():
     return render_template('index.html')
 
+# summarize url when user makes POST reqquest to /generate_pdf_and_summarize URL 
 @app.route('/generate_pdf_and_summarize', methods=['POST'])
 def generate_pdf_and_summarize():
     try:
         url = request.form['url']
-
         pdfkit.from_url(url, 'output.pdf')
-
         summary = summarize_pdf_with_langchain('output.pdf')
-        # os.remove('output.pdf')
+
         # Return the summary to the client
         return jsonify({'summary': summary})
 
@@ -46,8 +47,6 @@ def generate_pdf_and_summarize():
         return jsonify({'error': str(e)})
 
 def summarize_pdf_with_langchain(pdf_file_path):
-    # Load the PDF file and summarize using LangChain
-
     loaders = [PyPDFLoader(pdf_file_path)]
     index = VectorstoreIndexCreator(
         embedding=HuggingFaceEmbeddings(),
@@ -64,13 +63,12 @@ def summarize_pdf_with_langchain(pdf_file_path):
     )
 
     model = LangChainInterface(model=ModelType.FLAN_UL2, credentials=creds, params=params)
-    from langchain.chains import RetrievalQA
     chain = RetrievalQA.from_chain_type(llm=model, 
                                         chain_type="stuff", 
                                         retriever=index.vectorstore.as_retriever(), input_key="question") 
                               
-    thing = chain.run("give a summary about this passage")
-    return thing
+    response = chain.run("give a summary about this passage")
+    return response
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8080)
