@@ -12,3 +12,7 @@ A Flask application to summarize URL passages using the watsonx Technology Previ
 
 ## Run app
 1. run `python3 app.py`
+
+## Demo video
+https://github.com/Enemily/summarize-url/assets/92351379/4162087d-052c-4372-9be3-5e363f94c675
+
